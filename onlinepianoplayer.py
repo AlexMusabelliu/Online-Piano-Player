@@ -1,13 +1,9 @@
-import win32com.client, win32api, win32con
 import time
-from turtle import Turtle, Screen
 import ctypes
 import sys
-from win32api import GetKeyState
 
 SendInput = ctypes.windll.user32.SendInput
 
-# C struct redefinitions 
 PUL = ctypes.POINTER(ctypes.c_ulong)
 class KeyBdInput(ctypes.Structure):
     _fields_ = [("wVk", ctypes.c_ushort),
@@ -38,8 +34,6 @@ class Input(ctypes.Structure):
     _fields_ = [("type", ctypes.c_ulong),
     ("ii", Input_I)]
 
-# Actuals Functions
-
 def PressKey(hexKeyCode):
     extra = ctypes.c_ulong(0)
     ii_ = Input_I()
@@ -54,35 +48,9 @@ def ReleaseKey(hexKeyCode):
     x = Input( ctypes.c_ulong(1), ii_ )
     ctypes.windll.user32.SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
 
-# directx scan codes http://www.gamespp.com/directx/directInputKeyboardScanCodes.html
-
 user32 = ctypes.WinDLL('user32', use_last_error=True)
 
-music = '''^qEtTiPiTtEq8(etYtpYpsps*EiPiPgPgJgJ[c9]JgJgPgPiPiE@^qQEQYEQiEQ4(eTeTITeiTe[i$]EiPiEiEiPiE[Y4]EYPYEpYe[YG]pY[^g]qEtTiPiTtEq8(e[ts]Yt[pS]Yp[sD]ps[*D]Ei[PS]iP[is]Ei[PS]iP[9dg]PiPiEiEQ[EH]q^[@G]^(QEQYEQiEQ4(e[Tg]eT[ID]TWiT[WS][i$s]EiPiEiEiPiE[Y4]EYPYEpYeYpY[^g]qEtTi[PJ]iTtEq[8j](et[YJ]t[pl]Yps[pG]s[*g]EiPiPgPgJgJ[c9]JgJgPgPiPiE[@G]^qQEQ[YL]EQiEQ[4l](eT[eJ]T[Ij]Te[il]Te[i$J]EiPiEiEiPiE[Y4]EYPYEpYeYpY[^g]qEtTi[PJ]iTtEq[8j](et[YJ]t[pl]Yps[pG]s[*g]EiPiPgPgJgJ[c9]JgJgPgPiPiE[@G]^qQEQ[YL]EQiEQ[4l](eT[eJ]T[Ij]Te[il]Te[i$J]EiPiEiEiPiE[Y4]EYPYEpYeYpY^qEtTiPiTtEq8(etYtpYpsps*EiPiPgPgJgJ[c9]JgJgPgPiPiE@^qQEQYEQiEQ4(eTeTITeiTe[i$]EiPiEiEiPiE[Y4]EYPYEpYeYpY ||| [^EPSJ]'''
-music = music.replace("\n", "").replace("{", "[").replace("}", "]").replace("|", " ")
-# s = Screen()
-# s.tracer(None)
-
-# t = Turtle("circle", visible=False)
-# t.pu()
-# t.color("black")
-# t.shapesize(3)
-
-tempo = 90
-
-# keyboard = Controller()
-
-# shell = win32com.client.Dispatch("WScript.Shell")
-
-# def rewrite():
-#     s.clearscreen()
-#     t.write(tempo, False, "center", ("MS Comic Sans", 30, "bold"))
-
-# t.goto(0, 0)
-# rewrite()
-
-# s.update()
-
+#dict. of key scancodes
 keydict = {"Q":0x10,
 "W":0x11,
 "E":0x12,
@@ -148,21 +116,30 @@ keydict = {"Q":0x10,
 ")":0x0B
 }
 
-def up():
-    s.onkeypress(up, None)
-    tempo += 1
-    rewrite()
-    s.onkeypress(up, "Up")
+MUSIC = '''^qEtTiPiTtEq8(etYtpYpsps*EiPiPgPgJgJ[c9]JgJgPgPiPiE@^qQEQYEQiEQ4(eTeTITeiTe[i$]EiPiEiEiPiE[Y4]EYPYEpYe[YG]pY[^g]qEtTiPiTtEq8(e[ts]Yt[pS]Yp[sD]ps[*D]Ei[PS]iP[is]Ei[PS]iP[9dg]PiPiEiEQ[EH]q^[@G]^(QEQYEQiEQ4(e[Tg]eT[ID]TWiT[WS][i$s]EiPiEiEiPiE[Y4]EYPYEpYeYpY[^g]qEtTi[PJ]iTtEq[8j](et[YJ]t[pl]Yps[pG]s[*g]EiPiPgPgJgJ[c9]JgJgPgPiPiE[@G]^qQEQ[YL]EQiEQ[4l](eT[eJ]T[Ij]Te[il]Te[i$J]EiPiEiEiPiE[Y4]EYPYEpYeYpY[^g]qEtTi[PJ]iTtEq[8j](et[YJ]t[pl]Yps[pG]s[*g]EiPiPgPgJgJ[c9]JgJgPgPiPiE[@G]^qQEQ[YL]EQiEQ[4l](eT[eJ]T[Ij]Te[il]Te[i$J]EiPiEiEiPiE[Y4]EYPYEpYeYpY^qEtTiPiTtEq8(etYtpYpsps*EiPiPgPgJgJ[c9]JgJgPgPiPiE@^qQEQYEQiEQ4(eTeTITeiTe[i$]EiPiEiEiPiE[Y4]EYPYEpYeYpY ||| [^EPSJ]'''
+MUSIC = MUSIC.replace("\n", "").replace("{", "[").replace("}", "]").replace("|", " ")
 
-def down():
-    s.onkeypress(down, None)
-    temp -= 1
-    rewrite()
-    s.onkeypress(down, "Down")
+TEMPO = 90
 
-def play():
-    delay = 1 / tempo * 60
-    print(delay)
+def play(v=False):
+    '''
+    Plays out the string listed in music by sending out keystrokes.
+
+    Chords can be played with placing keys in brackets - i.e. [keys].
+    | are converted to " " for compatibility with some sheet music.
+    Curly braces are interpreted as brackets: remove those if not supposed to be chords.
+
+    Args:
+        v (optional): default false, sets the verbose flag to true
+        
+    Returns:
+        N/A
+    '''
+    delay = 1 / TEMPO * 60
+    
+    if v:
+        print(f"Time between each note: {delay}")
+    
     building = False
     mult = 1/4
     pDelay = delay
@@ -170,8 +147,7 @@ def play():
 
     specials = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")"]
 
-    for b in music:
-        # print(b)
+    for b in MUSIC:
         if b == "]":
             delay = pDelay
             mult = pMult
@@ -184,24 +160,20 @@ def play():
 
         elif b != " ":
             bd = keydict.get(b.upper(), 0x2C)
-            if b.isupper() or b in specials:
+
+            use_shift = b.isupper() or b in specials
+
+            if use_shift:
                 PressKey(keydict.get("LSHIFT"))
+
             PressKey(bd)
             ReleaseKey(bd)
-            if b.isupper() or b in specials:
-                ReleaseKey(keydict.get("LSHIFT"))
 
-        else:
-            mult = 1/4
+            if use_shift:
+                ReleaseKey(keydict.get("LSHIFT"))
 
         time.sleep(delay * mult)
 
-# s.listen()
-# s.onkeypress(up, "Up")
-# s.onkeypress(down, "Down")
-
-time.sleep(5)
-
-play()
-
-# s.mainloop()
+if __name__ == "__main__":
+    time.sleep(5)
+    play(v=True)
