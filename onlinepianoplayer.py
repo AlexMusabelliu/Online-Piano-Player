@@ -2,7 +2,8 @@ import win32com.client, win32api, win32con
 import time
 from turtle import Turtle, Screen
 import ctypes
-import time
+import sys
+from win32api import GetKeyState
 
 SendInput = ctypes.windll.user32.SendInput
 
@@ -57,10 +58,9 @@ def ReleaseKey(hexKeyCode):
 
 user32 = ctypes.WinDLL('user32', use_last_error=True)
 
-music = '''QWERTYqwerty'''
-
+music = '''^qEtTiPiTtEq8(etYtpYpsps*EiPiPgPgJgJ[c9]JgJgPgPiPiE@^qQEQYEQiEQ4(eTeTITeiTe[i$]EiPiEiEiPiE[Y4]EYPYEpYe[YG]pY[^g]qEtTiPiTtEq8(e[ts]Yt[pS]Yp[sD]ps[*D]Ei[PS]iP[is]Ei[PS]iP[9dg]PiPiEiEQ[EH]q^[@G]^(QEQYEQiEQ4(e[Tg]eT[ID]TWiT[WS][i$s]EiPiEiEiPiE[Y4]EYPYEpYeYpY[^g]qEtTi[PJ]iTtEq[8j](et[YJ]t[pl]Yps[pG]s[*g]EiPiPgPgJgJ[c9]JgJgPgPiPiE[@G]^qQEQ[YL]EQiEQ[4l](eT[eJ]T[Ij]Te[il]Te[i$J]EiPiEiEiPiE[Y4]EYPYEpYeYpY[^g]qEtTi[PJ]iTtEq[8j](et[YJ]t[pl]Yps[pG]s[*g]EiPiPgPgJgJ[c9]JgJgPgPiPiE[@G]^qQEQ[YL]EQiEQ[4l](eT[eJ]T[Ij]Te[il]Te[i$J]EiPiEiEiPiE[Y4]EYPYEpYeYpY^qEtTiPiTtEq8(etYtpYpsps*EiPiPgPgJgJ[c9]JgJgPgPiPiE@^qQEQYEQiEQ4(eTeTITeiTe[i$]EiPiEiEiPiE[Y4]EYPYEpYeYpY ||| [^EPSJ]'''
+music = music.replace("\n", "").replace("{", "[").replace("}", "]").replace("|", " ")
 # s = Screen()
-
 # s.tracer(None)
 
 # t = Turtle("circle", visible=False)
@@ -68,7 +68,7 @@ music = '''QWERTYqwerty'''
 # t.color("black")
 # t.shapesize(3)
 
-tempo = 200
+tempo = 90
 
 # keyboard = Controller()
 
@@ -93,8 +93,8 @@ keydict = {"Q":0x10,
 "I":0x17,
 "O":0x18,
 "P":0x19,
-"LBRACKET":0x1A,
-"RBRACKET":0x1B,
+"[":0x1A,
+"]":0x1B,
 "RETURN":0x1C,
 "LCONTROL":0x1D,
 "A":0x1E,
@@ -106,11 +106,11 @@ keydict = {"Q":0x10,
 "J":0x24,
 "K":0x25,
 "L":0x26,
-"SEMICOLON":0x27,
-"APOSTROPHE":0x28,
-"GRAVE":0x29,
+";":0x27,
+"'":0x28,
+"`":0x29,
 "LSHIFT":0x2A,
-"BACKSLASH":0x2B,
+"\\":0x2B,
 "Z":0x2C,
 "X":0x2D,
 "C":0x2E,
@@ -118,13 +118,13 @@ keydict = {"Q":0x10,
 "B":0x30,
 "N":0x31,
 "M":0x32,
-"COMMA":0x33,
-"PERIOD":0x34,
-"SLASH":0x35,
+",":0x33,
+".":0x34,
+"/":0x35,
 "RSHIFT":0x36,
-"MULTIPLY":0x37,   
-"LMENU":0x38 ,  
-"SPACE":0x39,
+"*":0x37,   
+"LMENU":0x38,  
+" ":0x39,
 "CAPITAL":0x3A,
 "1":0x02,
 "2":0x03,
@@ -135,7 +135,17 @@ keydict = {"Q":0x10,
 "7":0x08,
 "8":0x09,
 "9":0x0A,
-"0":0x0B
+"0":0x0B,
+"!":0x02,
+"@":0x03,
+"#":0x04,
+"$":0x05,
+"%":0x06,
+"^":0x07,
+"&":0x08,
+"*":0x09,
+"(":0x0A,
+")":0x0B
 }
 
 def up():
@@ -153,20 +163,36 @@ def down():
 def play():
     delay = 1 / tempo * 60
     print(delay)
+    building = False
+    mult = 1/4
+    pDelay = delay
+    pMult = mult
+
+    specials = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")"]
+
     for b in music:
-        mult = 1
         # print(b)
-        if b != " ":
+        if b == "]":
+            delay = pDelay
+            mult = pMult
+
+        elif b == "[":
+            pDelay = delay
+            delay = 0.005
+            pMult = mult
+            mult = 1
+
+        elif b != " ":
             bd = keydict.get(b.upper(), 0x2C)
-            if b.isupper():
+            if b.isupper() or b in specials:
                 PressKey(keydict.get("LSHIFT"))
             PressKey(bd)
             ReleaseKey(bd)
-            if b.isupper():
+            if b.isupper() or b in specials:
                 ReleaseKey(keydict.get("LSHIFT"))
 
         else:
-            mult = 1/2
+            mult = 1/4
 
         time.sleep(delay * mult)
 
