@@ -1,6 +1,9 @@
 import time
 import ctypes
 import sys
+import pyHook
+from win32gui import PumpMessages, PostQuitMessage
+import threading
 
 SendInput = ctypes.windll.user32.SendInput
 
@@ -116,12 +119,35 @@ keydict = {"Q":0x10,
 ")":0x0B
 }
 
-MUSIC = '''^qEtTiPiTtEq8(etYtpYpsps*EiPiPgPgJgJ[c9]JgJgPgPiPiE@^qQEQYEQiEQ4(eTeTITeiTe[i$]EiPiEiEiPiE[Y4]EYPYEpYe[YG]pY[^g]qEtTiPiTtEq8(e[ts]Yt[pS]Yp[sD]ps[*D]Ei[PS]iP[is]Ei[PS]iP[9dg]PiPiEiEQ[EH]q^[@G]^(QEQYEQiEQ4(e[Tg]eT[ID]TWiT[WS][i$s]EiPiEiEiPiE[Y4]EYPYEpYeYpY[^g]qEtTi[PJ]iTtEq[8j](et[YJ]t[pl]Yps[pG]s[*g]EiPiPgPgJgJ[c9]JgJgPgPiPiE[@G]^qQEQ[YL]EQiEQ[4l](eT[eJ]T[Ij]Te[il]Te[i$J]EiPiEiEiPiE[Y4]EYPYEpYeYpY[^g]qEtTi[PJ]iTtEq[8j](et[YJ]t[pl]Yps[pG]s[*g]EiPiPgPgJgJ[c9]JgJgPgPiPiE[@G]^qQEQ[YL]EQiEQ[4l](eT[eJ]T[Ij]Te[il]Te[i$J]EiPiEiEiPiE[Y4]EYPYEpYeYpY^qEtTiPiTtEq8(etYtpYpsps*EiPiPgPgJgJ[c9]JgJgPgPiPiE@^qQEQYEQiEQ4(eTeTITeiTe[i$]EiPiEiEiPiE[Y4]EYPYEpYeYpY ||| [^EPSJ]'''
-MUSIC = MUSIC.replace("\n", "").replace("{", "[").replace("}", "]").replace("|", " ")
+MUSIC = '''p [wP] y o P [qs] i p [(P]
+o P d [8D] o d s [wP] y
+o P [qs] i p [(P] o P d
+[8D] o d s [wP] y o P [qs] i
+p [(P] o P d [8D] o d s
+[wP] y o P [qp] t i [(o] t
+i [(o] i o p [5wP] y o P
+[4qs] i p [@(P] o P d [18D] o
+d s [5wP] y o P [4qs] i p [@(P]
+o P d [18D] o d s [5wP] y
+o P [4qs] i p [@(P] o P d
+[18D] o d s [5wP] y o P [4qp] t
+i [@(o] t i [@(o] i o p
+[5wP] y [5wo] P [4qs] i [4qp] P [@(] o
+[@(P] d [18D] o [18d] s [5wP] y [5wo] P
+[4qs] i [4qp] P [@(] o [@(P] d [18D] o
+[18d] s [5wP] y [5wo] P [4qs] i [4qp] P
+[@(] o [@(P] d [18D] o [18d] s [5wP] y
+[5wo] P [4qp] t [4qi] o [5w] t i o
+[5w] [5w] y y Y Y y'''
 
-TEMPO = 90
+MUSIC = MUSIC.replace("\n", " ").replace("{", "[").replace("}", "]").replace("|", " ").replace(" - ", "   ")
 
-def play(v=False):
+TEMPO = 120
+
+cont = True
+killSelf = False
+
+def play(v=False, contf=None):
     '''
     Plays out the string listed in music by sending out keystrokes.
 
@@ -131,14 +157,20 @@ def play(v=False):
 
     Args:
         v (optional): default false, sets the verbose flag to true
+        contf (optional): default None, python function to verify if playing should continue
         
     Returns:
         N/A
     '''
+    global killSelf
+
     delay = 1 / TEMPO * 60
     
     if v:
         print(f"Time between each note: {delay}")
+
+    if contf:
+        contf()
     
     building = False
     mult = 1/4
@@ -148,32 +180,73 @@ def play(v=False):
     specials = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")"]
 
     for b in MUSIC:
-        if b == "]":
-            delay = pDelay
-            mult = pMult
+        if cont:
+            if b == "]":
+                delay = pDelay
+                mult = pMult
 
-        elif b == "[":
-            pDelay = delay
-            delay = 0.005
-            pMult = mult
-            mult = 1
+            elif b == "[":
+                pDelay = delay
+                delay = 0.005
+                pMult = mult
+                mult = 1
 
-        elif b != " ":
-            bd = keydict.get(b.upper(), 0x2C)
+            elif b != " ":
+                bd = keydict.get(b.upper(), 0x2C)
 
-            use_shift = b.isupper() or b in specials
+                use_shift = b.isupper() or b in specials
 
-            if use_shift:
-                PressKey(keydict.get("LSHIFT"))
+                if use_shift:
+                    PressKey(keydict.get("LSHIFT"))
 
-            PressKey(bd)
-            ReleaseKey(bd)
+                PressKey(bd)
+                ReleaseKey(bd)
 
-            if use_shift:
-                ReleaseKey(keydict.get("LSHIFT"))
+                if use_shift:
+                    ReleaseKey(keydict.get("LSHIFT"))
 
-        time.sleep(delay * mult)
+            time.sleep(delay * mult)
+
+        elif cont == False:
+            while not cont:
+                time.sleep(0.01)
+        
+        else:
+            break
+
+    killSelf = True
+
+def _hhook(event):
+    global cont
+
+    if event.ScanCode == 0x3F:
+        cont = not cont
+        print(f"Swapped: {event.Key} pressed")
+
+    elif event.ScanCode == 0x3E or killSelf:
+        cont = None
+        print(f"Stopped: {event.Key} pressed")
+        PostQuitMessage(0)
+        hm.UnhookKeyboard()
+
+
+    return True
+
+def _hook():
+    global hm 
+
+    hm = pyHook.HookManager()
+    hm.KeyDown = _hhook
+    hm.HookKeyboard()
+    PumpMessages()
+
+def hook():
+    t = threading.Thread(target=_hook)
+    t.start()
+
+def main():
+    play(v=True, contf=hook)
 
 if __name__ == "__main__":
     time.sleep(5)
-    play(v=True)
+    main()
