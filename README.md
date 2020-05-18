@@ -18,7 +18,7 @@ For compatibility with certain scores:
 * Newlines (\n) are converted to " "
 * "-" are removed (i.e. converted to "")
 * "-\n" (dashes with newlines) are removed (i.e. converted to "")
-* " - " are converted to "   " (three quarter rests)
+* " - " are converted to "&nbsp;&nbsp;&nbsp;" (three quarter rests)
 
 ## Letter index
 Letter | Note
