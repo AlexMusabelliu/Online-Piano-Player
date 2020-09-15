@@ -2,6 +2,7 @@
 Send keys in rhythm to the active window.
 Used for pianos like https://virtualpiano.net/.
 Change the "music" string to alter what the program plays. Every note is played at quarter a beat at the bpm (tempo). Spaces are a quarter rest.
+F4 pauses the music, F5 stops the music entirely.
 
 ## Syntax
 " " = A quarter rest.
